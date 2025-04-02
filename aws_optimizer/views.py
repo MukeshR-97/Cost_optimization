@@ -2,10 +2,11 @@ import json
 import boto3
 from django.http import JsonResponse
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 # Helper function to generate JWT tokens
 def get_tokens_for_user(user):
@@ -58,6 +59,17 @@ def logout_user(request):
         return Response({"message": "Successfully logged out"}, status=200)
     except Exception as e:
         return Response({"error": str(e)}, status=400)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_details(request):
+    user = request.user
+    return Response({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email
+    })
+
 
 # AWS Resource Management Functions
 def get_aws_resources(request):
